@@ -1,0 +1,34 @@
+spring:
+  jpa:
+    show-sql: true # Whether to enable logging of SQL statements.
+    open-in-view: false # to dump the queries to standard out
+    defer-datasource-initialization: true # create our tables before inserting the data into them
+    properties:
+      hibernate:
+        format_sql: true
+        default_batch_fetch_size: 20 # optimizing the fetching behavior within Hibernate itself
+        jdbc.batch_size: 20 # optimizing database writes by batching SQL statements for execution
+  datasource:
+    url: jdbc:h2:mem:voting
+    username: sa
+    password:
+
+  jackson.visibility:
+    field: any
+    getter: none
+    setter: none
+    is-getter: none
+
+logging:
+  level:
+    root: WARN # logging level for all packages
+    voting: DEBUG
+    org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver: DEBUG
+
+server.servlet:
+  encoding:
+    charset: UTF-8
+    enabled: true
+    force: true
+
+springdoc.swagger-ui.path: /
