@@ -5,7 +5,8 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;
-import lombok.*;
+import lombok.Getter;
+import lombok.ToString;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -13,8 +14,6 @@ import java.util.Date;
 @Entity
 @Table(name = "dish", uniqueConstraints = {@UniqueConstraint(columnNames = {"name", "rest_id", "dish_date"}, name = "dish_unique_name_restaurant_date_idx")})
 @Getter
-@Setter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @ToString(callSuper = true, exclude = {"restaurant"})
 public class Dish extends NamedEntity {
 

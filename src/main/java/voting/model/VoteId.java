@@ -1,23 +1,19 @@
 package voting.model;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
 @Embeddable
 @Getter
-@Setter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 public class VoteId {
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "rest_id", nullable = false)
-    private Restaurant restaurant;
+    @Column(name = "rest_id", nullable = false)
+    private Integer restaurantId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false, updatable = false)
-    private User user;
+    private Integer userId;
 }

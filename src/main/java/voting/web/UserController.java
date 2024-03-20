@@ -5,10 +5,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import voting.model.User;
 import voting.repository.UserRepository;
+import voting.to.UserVoteTo;
 
 import java.util.List;
 
@@ -28,5 +30,11 @@ public class UserController {
     public List<User> getAll() {
         log.info("getAll");
         return repository.findAll(Sort.by(Sort.Direction.ASC, "name", "email"));
+    }
+
+    @GetMapping("/{id}")
+    public UserVoteTo get(@PathVariable int id) {
+        log.info("Get user with userId: " + id);
+        return repository.get(id);
     }
 }

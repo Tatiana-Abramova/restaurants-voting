@@ -2,14 +2,16 @@ package voting.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.springframework.data.util.ProxyUtils;
 
 @MappedSuperclass
 //  https://stackoverflow.com/a/6084701/548473
 @Access(AccessType.FIELD)
 @Getter
-@Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 public abstract class BaseEntity {
