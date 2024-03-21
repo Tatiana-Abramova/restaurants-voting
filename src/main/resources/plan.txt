@@ -14,7 +14,7 @@ POST Rest(id,name,registered)		создать новый ресторан
 /admin/restaurants/{id}
 GET Rest(id,name,registered)			получить ресторан
 PUT Rest(id,name,registered)			изменить данные ресторана
-DELTE		удалить ресторан (только если за него не голосовали сегодня, в БД помечаем как неактивный/удаленный)
+DELETE		удалить ресторан (только если за него не голосовали сегодня, в БД помечаем как неактивный/удаленный)
 /restaurants/{id}/menu/today
 GET			получить меню на сегодня
 /admin/restaurants/{id}/menu

@@ -3,15 +3,20 @@ package voting.web;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import voting.model.User;
 import voting.repository.UserRepository;
+import voting.to.UserTo;
 import voting.to.UserVoteTo;
+import voting.to.mapper.Mapper;
 
+import java.net.URI;
 import java.util.List;
 
 import static org.slf4j.LoggerFactory.getLogger;
@@ -35,6 +40,28 @@ public class UserController {
     @GetMapping("/{id}")
     public UserVoteTo get(@PathVariable int id) {
         log.info("Get user with userId: " + id);
-        return repository.get(id);
+        return repository.getWithVote(id);
+    }
+
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseStatus(HttpStatus.CREATED)
+    public ResponseEntity<User> register(@RequestBody UserTo userTo) {
+        log.info("register {}", userTo);
+        if (userTo.id() != null) {
+            throw new IllegalArgumentException("User must be new");
+        }
+        User created = repository.save(Mapper.createFromUserTo(userTo));
+        URI uriOfNewResource = ServletUriComponentsBuilder.fromCurrentContextPath()
+                .path(REST_URL).build().toUri();
+        return ResponseEntity.created(uriOfNewResource).body(created);
+    }
+
+    @PutMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @Transactional
+    public void update(@RequestBody UserTo userTo) {
+        log.info("update {}", userTo);
+        User user = repository.getReferenceById(userTo.id());
+        Mapper.updateFromUserTo(user, userTo);
     }
 }
