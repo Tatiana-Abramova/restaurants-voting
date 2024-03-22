@@ -15,13 +15,14 @@ import java.util.EnumSet;
 import java.util.Set;
 
 @Entity
-@Table(name = "users")
+@Table(name = "users", uniqueConstraints = {
+        @UniqueConstraint(name = "users_unique_email_idx", columnNames = {"email"})})
 @Getter
 @Setter
 @NoArgsConstructor
 public class User extends NamedEntity {
 
-    @Column(name = "email", nullable = false, unique = true)
+    @Column(name = "email", nullable = false)
     @Email
     @NotBlank
     @Size(max = 128)

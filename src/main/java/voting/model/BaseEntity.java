@@ -22,7 +22,7 @@ public abstract class BaseEntity {
     protected Integer id;
 
     //    https://stackoverflow.com/questions/1638723
-    @Override
+    @Override //TODO Add description
     public boolean equals(Object o) {
         if (this == o) {
             return true;
