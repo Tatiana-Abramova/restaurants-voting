@@ -8,8 +8,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.util.ProxyUtils;
 
+import java.util.Objects;
+
 @MappedSuperclass
-//  https://stackoverflow.com/a/6084701/548473
 @Access(AccessType.FIELD)
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -18,10 +19,9 @@ public abstract class BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Schema(accessMode = Schema.AccessMode.READ_ONLY) // https://stackoverflow.com/a/28025008/548473
+    @Schema(accessMode = Schema.AccessMode.READ_ONLY)
     protected Integer id;
 
-    //    https://stackoverflow.com/questions/1638723
     @Override //TODO Add description
     public boolean equals(Object o) {
         if (this == o) {
@@ -31,7 +31,7 @@ public abstract class BaseEntity {
             return false;
         }
         BaseEntity that = (BaseEntity) o;
-        return id != null && id.equals(that.id);
+        return Objects.equals(id, that.id);
     }
 
     @Override

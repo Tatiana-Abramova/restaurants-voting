@@ -1,6 +1,5 @@
 package voting.config;
 
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import org.slf4j.Logger;
@@ -9,6 +8,8 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.lang.NonNull;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
@@ -43,6 +44,12 @@ public class RestExceptionHandler {
         return assembleErrorMessage(e, request, ErrorType.DATA_NOT_FOUND);
     }
 
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    @ExceptionHandler(InsufficientAuthenticationException.class)
+    ErrorMessage auth(InsufficientAuthenticationException e, HttpServletRequest request) {
+        return assembleErrorMessage(e, request, ErrorType.UNAUTHORIZED);
+    }
+
     @ResponseStatus(HttpStatus.CONFLICT)
     @ExceptionHandler(DataIntegrityViolationException.class)
     ErrorMessage conflict(DataIntegrityViolationException e, HttpServletRequest request) {
@@ -74,7 +81,8 @@ public class RestExceptionHandler {
             HttpMessageNotReadableException.class,
             HttpRequestMethodNotSupportedException.class,
             IllegalArgumentException.class,
-            ConstraintViolationException.class})
+            ConstraintViolationException.class,
+            BadCredentialsException.class})
     public ErrorMessage badRequestException(Exception e, HttpServletRequest request) {
         return assembleErrorMessage(e, request, ErrorType.VALIDATION_ERROR);
     }

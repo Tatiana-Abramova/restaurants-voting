@@ -12,12 +12,16 @@ spring:
     url: jdbc:h2:mem:voting
     username: sa
     password:
-
-  jackson.visibility:
-    field: any
-    getter: none
-    setter: none
-    is-getter: none
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: Europe/Moscow
+    serialization:
+      write-dates-as-timestamps: false
+    visibility:
+      field: any
+      getter: none
+      setter: none
+      is-getter: none
 
 logging:
   level:

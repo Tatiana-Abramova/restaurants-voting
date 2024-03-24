@@ -54,6 +54,10 @@ public class User extends NamedEntity {
         this.roles = Set.of(roles);
     }
 
+    public boolean hasRole(Role role) {
+        return roles.contains(role);
+    }
+
     @Override
     public String toString() {
         return "User:" + id + '[' + email + ']';
