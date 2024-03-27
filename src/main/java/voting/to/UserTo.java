@@ -5,6 +5,7 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
+@Schema(name = "New user")
 public record UserTo(
         Integer id,
         @NotBlank @Size(min = 2, max = 128) String name,

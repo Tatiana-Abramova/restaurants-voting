@@ -1,6 +1,9 @@
 package voting.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -13,6 +16,7 @@ import lombok.Setter;
 import java.util.Date;
 import java.util.EnumSet;
 import java.util.Set;
+
 
 @Entity
 @Table(name = "users", uniqueConstraints = {

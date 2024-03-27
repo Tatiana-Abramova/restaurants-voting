@@ -16,7 +16,17 @@ import org.springframework.context.annotation.Configuration;
         type = SecuritySchemeType.HTTP,
         scheme = "basic"
 )
-@OpenAPIDefinition(security = @SecurityRequirement(name = "basicAuth"))
+@OpenAPIDefinition(info = @Info(
+        title = "Voting for restaurants",
+        version = "1.0",
+        description = """
+                Voting for restaurants Spring Boot application
+                <p><b>Test credentials:</b><br>
+                - user@yandex.ru / password<br>
+                - admin@gmail.com / admin<br>
+                - guest@gmail.com / guest</p>
+                """),
+        security = @SecurityRequirement(name = "basicAuth"))
 public class OpenApiConfig {
 
     @Bean

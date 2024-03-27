@@ -1,5 +1,7 @@
 package voting.web;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
@@ -23,6 +25,7 @@ import java.net.URI;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
+@Tag(name="User Profile")
 @RestController
 @RequestMapping(value = ProfileController.REST_URL, produces = MediaType.APPLICATION_JSON_VALUE)
 public class ProfileController {
@@ -39,12 +42,14 @@ public class ProfileController {
         return repository.findAll(Sort.by(Sort.Direction.ASC, "id"));
     }*/
 
+    @Operation(summary = "Get authorized user details")
     @GetMapping()
     public UserVoteTo get(@AuthenticationPrincipal AuthUser authUser) {
         log.info("Get user with userId: " + authUser.id());
         return repository.getWithVote(authUser.id());
     }
 
+    @Operation(summary = "Register a new user. Authorization is not required")
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<User> register(@RequestBody @Valid UserTo userTo) {
@@ -58,6 +63,7 @@ public class ProfileController {
         return ResponseEntity.created(uriOfNewResource).body(created);
     }
 
+    @Operation(summary = "Update authorized user details")
     @PutMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Transactional
