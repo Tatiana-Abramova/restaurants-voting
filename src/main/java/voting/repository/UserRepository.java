@@ -1,10 +1,12 @@
 package voting.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
+import voting.error.NotFoundException;
 import voting.model.User;
 import voting.to.UserVoteTo;
 
@@ -23,9 +25,13 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     UserVoteTo getWithVote(@Param("id") Integer id);
 
     @Transactional
-    default User prepareAndSave(User user) {
-        user.setPassword(PASSWORD_ENCODER.encode(user.getPassword()));
-        user.setEmail(user.getEmail().toLowerCase());
-        return save(user);
+    @Modifying
+    @Query("DELETE FROM User u WHERE u.id=:id")
+    int delete(int id);
+
+    default void deleteExisted(int id) {
+        if (delete(id) == 0) {
+            throw new NotFoundException("User with id=" + id + " not found");
+        }
     }
 }

@@ -36,7 +36,7 @@ public class RestExceptionHandler {
     private final Logger log = getLogger(getClass());
 
     private static final Map<String, String> CONSTRAINTS = Map.of(
-            "users_unique_email_idx", "User with this email already exists");
+            "users_unique_email_idx", "User with this email already exists");// TODO вынести в константу
 
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @ExceptionHandler(NotFoundException.class)
