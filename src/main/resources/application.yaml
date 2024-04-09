@@ -23,6 +23,10 @@ spring:
       setter: none
       is-getter: none
 
+voting:
+  deadline:
+    hours: 11
+    minutes: 0
 logging:
   level:
     root: WARN # logging level for all packages

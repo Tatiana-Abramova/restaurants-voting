@@ -1,28 +1,39 @@
 package voting.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.EmbeddedId;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
-import jakarta.validation.constraints.NotNull;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
 import lombok.Getter;
-
-import java.util.Date;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "vote")
 @Getter
+@Setter
+@NoArgsConstructor
 public class Vote {
 
     @EmbeddedId
     private VoteId id;
 
-    @Column(name = "vote_date", nullable = false, columnDefinition = "date default CURRENT_DATE")
-    @NotNull
-    private Date voteDate = new Date();
+    @MapsId("restaurantId")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "rest_id", nullable = false, updatable = false)
+    @JsonIgnore
+    private Restaurant restaurant;
+
+    @MapsId("userId")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false, updatable = false)
+    @JsonIgnore
+    private User user;
+
+    public Vote(VoteId id) {
+        this.id = id;
+    }
 
     @Override
     public String toString() {
-        return "Vote: userId:" + id.getUserId() + ", restaurantId:" + id.getRestaurantId() + ", date:" + voteDate;
+        return "Vote: userId:" + id.getUserId() + ", restaurantId:" + id.getRestaurantId() + ", date:" + id.getVoteDate();
     }
 }

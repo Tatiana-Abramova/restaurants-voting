@@ -1,9 +1,7 @@
 package voting.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import io.swagger.v3.oas.annotations.OpenAPIDefinition;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -42,6 +40,10 @@ public class User extends NamedEntity {
     @NotNull
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Date registered = new Date();
+
+    @Column(name = "deleted", nullable = false, columnDefinition = "bool default false")
+    @JsonIgnore
+    private boolean deleted = false;
 
     @Enumerated(EnumType.STRING)
     @CollectionTable(name = "user_role",

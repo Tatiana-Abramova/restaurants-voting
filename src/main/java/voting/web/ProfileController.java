@@ -9,18 +9,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import voting.model.User;
 import voting.repository.UserRepository;
 import voting.security.AuthUser;
 import voting.to.UserTo;
 import voting.to.UserVoteTo;
 import voting.to.mapper.UserMapper;
+import voting.util.RestUtil;
 import voting.util.UserUtil;
-
-import java.net.URI;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -28,18 +25,18 @@ import static org.slf4j.LoggerFactory.getLogger;
 @RestController
 @RequestMapping(value = ProfileController.REST_URL, produces = MediaType.APPLICATION_JSON_VALUE)
 public class ProfileController {
-    protected final Logger log = getLogger(getClass());
+    private final Logger log = getLogger(getClass());
 
-    static final String REST_URL = "/api/profile";
+    protected static final String REST_URL = "/api/profile";
 
     @Autowired
-    protected UserRepository repository;
+    private UserRepository repository;
 
     @Operation(summary = "Get authorized user details")
     @GetMapping()
     public UserVoteTo get(@AuthenticationPrincipal AuthUser authUser) {
-        log.info("Get user with userId: " + authUser.id());
-        return repository.getWithVote(authUser.id());
+        log.info("get user with id = {}", authUser.id());
+        return repository.getWithVoteExisted(authUser.id());
     }
 
     @Operation(summary = "Register a new user. Authorization is not required")
@@ -47,25 +44,17 @@ public class ProfileController {
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<User> register(@RequestBody @Valid UserTo userTo) {
         log.info("register {}", userTo);
-        if (userTo.id() != null) {//TODO вынести проверку
-            throw new IllegalArgumentException("User must be new");
-        }
+        userTo.checkNew();
         User created =
                 repository.save(UserUtil.prepareToSave(UserMapper.createFromUserTo(userTo)));
-        URI uriOfNewResource = ServletUriComponentsBuilder.fromCurrentContextPath()
-                .path(REST_URL).build().toUri();
-        return ResponseEntity.created(uriOfNewResource).body(created);
+        return RestUtil.buildResponse(created, REST_URL);
     }
 
     @Operation(summary = "Update authorized user details")
     @PutMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @Transactional
     public void update(@RequestBody @Valid UserTo userTo, @AuthenticationPrincipal AuthUser authUser) {
         log.info("update {} with id={}", userTo, authUser.id());
-        if (authUser.id() != userTo.id()) {//TODO вынести проверку
-            throw new IllegalArgumentException("User must have id =" + authUser.id());
-        }
         User user = authUser.getUser();
         UserUtil.prepareToSave(UserMapper.updateFromUserTo(user, userTo));
         repository.save(user);

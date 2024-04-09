@@ -18,9 +18,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
-import voting.error.ErrorMessage;
-import voting.error.ErrorType;
-import voting.error.NotFoundException;
+import voting.error.*;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -36,7 +34,8 @@ public class RestExceptionHandler {
     private final Logger log = getLogger(getClass());
 
     private static final Map<String, String> CONSTRAINTS = Map.of(
-            "users_unique_email_idx", "User with this email already exists");// TODO вынести в константу
+            "users_unique_email_idx", "User with this email already exists",
+            "restaurant_unique_name_idx", "Restaurant with this name already exists");
 
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @ExceptionHandler(NotFoundException.class)
@@ -51,8 +50,8 @@ public class RestExceptionHandler {
     }
 
     @ResponseStatus(HttpStatus.CONFLICT)
-    @ExceptionHandler(DataIntegrityViolationException.class)
-    ErrorMessage conflict(DataIntegrityViolationException e, HttpServletRequest request) {
+    @ExceptionHandler({DataIntegrityViolationException.class, DataConflictException.class})
+    ErrorMessage conflict(Exception e, HttpServletRequest request) {
         String message = getRootCause(e).getLocalizedMessage().toLowerCase();
         for (Map.Entry<String, String> entry : CONSTRAINTS.entrySet()) {
             if (message.contains(entry.getKey())) {
@@ -60,6 +59,12 @@ public class RestExceptionHandler {
             }
         }
         return assembleErrorMessage(e, request, ErrorType.DATA_ERROR);
+    }
+
+    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
+    @ExceptionHandler(InvalidTimeException.class)
+    ErrorMessage unprocessable(InvalidTimeException e, HttpServletRequest request) {
+        return assembleErrorMessage(e, request, ErrorType.VALIDATION_ERROR);
     }
 
     @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)

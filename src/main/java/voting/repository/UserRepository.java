@@ -1,7 +1,5 @@
 package voting.repository;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -10,28 +8,39 @@ import voting.error.NotFoundException;
 import voting.model.User;
 import voting.to.UserVoteTo;
 
+import java.util.List;
 import java.util.Optional;
-
-import static voting.config.SecurityConfig.PASSWORD_ENCODER;
 
 @Repository
 @Transactional(readOnly = true)
-public interface UserRepository extends JpaRepository<User, Integer> {
+public interface UserRepository extends BaseRepository<User> {
 
-    @Query("SELECT u FROM User u WHERE u.email = LOWER(:email)")
+    @Override
+    default User getExisted(int id) {
+        return applyExisted(this::get, id, User.class);
+    }
+
+    @Query("SELECT u FROM User u WHERE u.deleted=false ORDER BY u.name, u.email")
+    List<User> getAll();
+
+    @Query("SELECT u FROM User u WHERE u.email = LOWER(:email) AND u.deleted=false")
     Optional<User> findByEmailIgnoreCase(String email);
+//TODO global WHERE condition for u.deleted=false
 
-    @Query("SELECT new voting.to.UserVoteTo(u.id, u.name, u.email, CAST(u.registered AS DATE), v.id.restaurantId) FROM User u LEFT JOIN FETCH Vote v ON u.id = v.id.userId WHERE u.id = :id AND (v.voteDate = CURRENT_DATE OR v.voteDate IS NULL) ORDER BY u.name, u.email")
-    UserVoteTo getWithVote(@Param("id") Integer id);
+    @Query("SELECT new voting.to.UserVoteTo(u.id, u.name, u.email, CAST(u.registered AS DATE), v.id.restaurantId) " +
+            "FROM User u " +
+            "LEFT JOIN FETCH Vote v ON u.id = v.id.userId " +
+            "WHERE u.id = :id AND (v.id.voteDate = CURRENT_DATE OR v.id.voteDate IS NULL)")
+    Optional<UserVoteTo> getWithVote(@Param("id") Integer id);
 
-    @Transactional
-    @Modifying
-    @Query("DELETE FROM User u WHERE u.id=:id")
-    int delete(int id);
+    default UserVoteTo getWithVoteExisted(int id) {
+        return applyExisted(this::getWithVote, id, User.class);
+    }
 
     default void deleteExisted(int id) {
         if (delete(id) == 0) {
-            throw new NotFoundException("User with id=" + id + " not found");
+            throw new NotFoundException(id, User.class);
         }
     }
 }
+

@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.util.ProxyUtils;
+import voting.HasId;
 
 import java.util.Objects;
 
@@ -13,12 +14,17 @@ import java.util.Objects;
 @Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
-public abstract class BaseEntity {
+public abstract class BaseEntity implements HasId {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Schema(accessMode = Schema.AccessMode.READ_ONLY)
     protected Integer id;
+
+    @Override
+    public Integer id() {
+        return id;
+    }
 
     @Override //TODO Add description
     public boolean equals(Object o) {
