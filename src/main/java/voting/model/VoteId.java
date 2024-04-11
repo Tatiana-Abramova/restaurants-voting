@@ -8,6 +8,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 @Embeddable
@@ -27,7 +28,7 @@ public class VoteId {
     @Column(name = "vote_date", nullable = false, updatable = false, columnDefinition = "date default CURRENT_DATE")
     @NotNull
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-    private Date voteDate = new Date();
+    private LocalDate voteDate = LocalDate.now();
 
     public VoteId(Integer restaurantId, Integer userId) {
         this.restaurantId = restaurantId;

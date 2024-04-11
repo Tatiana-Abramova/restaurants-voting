@@ -1,5 +1,6 @@
 package voting.repository;
 
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -19,13 +20,13 @@ public interface RestaurantRepository extends BaseRepository<Restaurant> {
         return applyExisted(this::get, id, Restaurant.class);
     }
 
-    @Transactional
+/*    @Transactional
     @Modifying
     @Query("UPDATE Restaurant r SET r.deleted=true WHERE r.id=:id")
-    int delete(int id);
+    int delete(int id);*/
 
     @Query("""
-            SELECT new voting.to.RestaurantTo(r.id, r.name, count(v.id.restaurantId))
+            SELECT new voting.to.RestaurantTo(r.id, r.name, r.registered, count(v.id.restaurantId))
             FROM Restaurant r
             LEFT JOIN FETCH Vote v ON r.id = v.id.restaurantId
             LEFT JOIN User u ON v.id.userId = u.id
@@ -36,14 +37,14 @@ public interface RestaurantRepository extends BaseRepository<Restaurant> {
             GROUP BY v.id.restaurantId
             ORDER BY r.name
             """)
-    Optional<RestaurantTo> getWithVoteCount(@Param("id") Integer id);
+    Optional<RestaurantTo> getWithVoteCount(int id);
 
     default RestaurantTo getWithVoteCountExisted(int id) {
         return applyExisted(this::getWithVoteCount, id, Restaurant.class);
     }
 
     @Query("""
-            SELECT new voting.to.RestaurantTo(r.id, r.name, count(v.id.restaurantId))
+            SELECT new voting.to.RestaurantTo(r.id, r.name, r.registered, count(v.id.restaurantId))
             FROM Restaurant r
             LEFT JOIN FETCH Vote v ON r.id = v.id.restaurantId
             LEFT JOIN User u ON v.id.userId = u.id
@@ -53,5 +54,6 @@ public interface RestaurantRepository extends BaseRepository<Restaurant> {
             GROUP BY r.id, r.name, v.id.restaurantId
             ORDER BY r.name
             """)
+    @Cacheable("restaurants")
     List<RestaurantTo> getAllWithVoteCount();
 }

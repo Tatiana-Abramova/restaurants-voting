@@ -21,7 +21,7 @@ import voting.util.UserUtil;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
-@Tag(name = "User Profile")
+@Tag(name = "1. User Profile")
 @RestController
 @RequestMapping(value = ProfileController.REST_URL, produces = MediaType.APPLICATION_JSON_VALUE)
 public class ProfileController {
@@ -33,7 +33,7 @@ public class ProfileController {
     private UserRepository repository;
 
     @Operation(summary = "Get authorized user details")
-    @GetMapping()
+    @GetMapping
     public UserVoteTo get(@AuthenticationPrincipal AuthUser authUser) {
         log.info("get user with id = {}", authUser.id());
         return repository.getWithVoteExisted(authUser.id());

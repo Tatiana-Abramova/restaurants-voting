@@ -6,7 +6,7 @@ public class NotFoundException extends ApiException {
     }
 
     public <T> NotFoundException(int id, Class<T> clazz) {
-        super(clazz.getSimpleName() + "with id=" + id + " not found");
+        super(clazz.getSimpleName() + " with id = " + id + " not found");
 
     }
 }

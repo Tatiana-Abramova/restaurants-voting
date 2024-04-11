@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -11,9 +12,11 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import voting.config.AppProperties;
 import voting.error.InvalidTimeException;
+import voting.model.Dish;
 import voting.model.Restaurant;
 import voting.model.Vote;
 import voting.model.VoteId;
+import voting.repository.DishRepository;
 import voting.repository.RestaurantRepository;
 import voting.repository.VoteRepository;
 import voting.security.AuthUser;
@@ -24,7 +27,7 @@ import java.util.List;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
-@Tag(name = "Restaurant Controller")
+@Tag(name = "3. Restaurant Controller")
 @RestController
 @RequestMapping(value = RestaurantController.REST_URL, produces = MediaType.APPLICATION_JSON_VALUE)
 public class RestaurantController {
@@ -40,10 +43,14 @@ public class RestaurantController {
     private VoteRepository voteRepository;
 
     @Autowired
+    private DishRepository dishRepository;
+
+    @Autowired
     private AppProperties properties;
 
     @Operation(summary = "Get all restaurants")
     @GetMapping
+    @Cacheable("restaurants")
     public List<RestaurantTo> getAll() {
         log.info("getAll");
         return restaurantRepository.getAllWithVoteCount();
@@ -71,5 +78,12 @@ public class RestaurantController {
         vote.setRestaurant(new Restaurant(id));
         vote.setUser(authUser.getUser());
         voteRepository.save(vote);
+    }
+
+    @Operation(summary = "Get restaurant menu")
+    @GetMapping("/{id}/menu")
+    public List<Dish> getMenu(@PathVariable int id) {
+        log.info("get menu for restaurantId = " + id);
+        return dishRepository.getAll(id);
     }
 }

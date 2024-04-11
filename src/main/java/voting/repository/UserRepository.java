@@ -1,5 +1,6 @@
 package voting.repository;
 
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -21,9 +22,11 @@ public interface UserRepository extends BaseRepository<User> {
     }
 
     @Query("SELECT u FROM User u WHERE u.deleted=false ORDER BY u.name, u.email")
+    @Cacheable("users")
     List<User> getAll();
 
     @Query("SELECT u FROM User u WHERE u.email = LOWER(:email) AND u.deleted=false")
+    @Cacheable("auth")
     Optional<User> findByEmailIgnoreCase(String email);
 //TODO global WHERE condition for u.deleted=false
 
@@ -31,7 +34,7 @@ public interface UserRepository extends BaseRepository<User> {
             "FROM User u " +
             "LEFT JOIN FETCH Vote v ON u.id = v.id.userId " +
             "WHERE u.id = :id AND (v.id.voteDate = CURRENT_DATE OR v.id.voteDate IS NULL)")
-    Optional<UserVoteTo> getWithVote(@Param("id") Integer id);
+    Optional<UserVoteTo> getWithVote(int id);
 
     default UserVoteTo getWithVoteExisted(int id) {
         return applyExisted(this::getWithVote, id, User.class);

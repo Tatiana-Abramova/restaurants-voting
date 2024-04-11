@@ -1,14 +1,17 @@
 package voting.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.ToString;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.Date;
 
 @Entity
@@ -23,12 +26,14 @@ public class Dish extends NamedEntity {
     @Column(name = "price", nullable = false, precision = 6, scale = 2)
     private BigDecimal price;
 
-    @Column(name = "dish_date", nullable = false, columnDefinition = "timestamp default now()", updatable = false)
+    @Column(name = "dish_date", nullable = false, columnDefinition = "date default CURRENT_DATE", updatable = false)
     @NotNull
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-    private Date dish_date = new Date();
+    private final LocalDate dishDate = LocalDate.now();
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "rest_id", nullable = false, updatable = false)
+    @JsonIgnore
+    @Setter
     private Restaurant restaurant;
 }

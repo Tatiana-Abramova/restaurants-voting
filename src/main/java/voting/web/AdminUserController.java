@@ -1,10 +1,17 @@
 package voting.web;
 
+
+import com.github.benmanes.caffeine.cache.Cache;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
+import org.springframework.cache.caffeine.CaffeineCache;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -15,10 +22,11 @@ import voting.util.RestUtil;
 import voting.util.UserUtil;
 
 import java.util.List;
+import java.util.Map;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
-@Tag(name = "User Administration")
+@Tag(name = "2. User Administration")
 @RestController
 @RequestMapping(value = AdminUserController.REST_URL, produces = MediaType.APPLICATION_JSON_VALUE)
 public class AdminUserController {
@@ -29,11 +37,31 @@ public class AdminUserController {
     @Autowired
     private UserRepository repository;
 
+    @Autowired
+    private CacheManager cacheManager;
+
     @Operation(summary = "Get all users")
     @GetMapping
     public List<User> getAll() {
         log.info("getAll");
         return repository.getAll();
+    }
+
+    @GetMapping(value = "/inspectCache")
+    public void inspectCache() {
+        CaffeineCache caffeineCache = (CaffeineCache) cacheManager.getCache("users");
+        Cache<Object, Object> nativeCache = caffeineCache.getNativeCache();
+        for (Map.Entry<Object, Object> entry : nativeCache.asMap().entrySet()) {
+            System.out.println("Key = " + entry.getKey());
+            System.out.println("Value = " + entry.getValue());
+        }
+        System.out.println("auth:");
+        caffeineCache = (CaffeineCache) cacheManager.getCache("auth");
+        nativeCache = caffeineCache.getNativeCache();
+        for (Map.Entry<Object, Object> entry : nativeCache.asMap().entrySet()) {
+            System.out.println("Key = " + entry.getKey());
+            System.out.println("Value = " + entry.getValue());
+        }
     }
 
     @Operation(summary = "Get user details by ID")
@@ -46,6 +74,7 @@ public class AdminUserController {
     @Operation(summary = "Create a new user")
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
+    @CacheEvict(value = {"users", "auth"}, allEntries = true)
     public ResponseEntity<User> create(@RequestBody @Valid User user) {
         log.info("create {}", user);
         user.checkNew();
@@ -55,6 +84,7 @@ public class AdminUserController {
 
     @Operation(summary = "Update user by ID")
     @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @CacheEvict(value = {"users", "auth"}, allEntries = true)
     public ResponseEntity<User> update(@Valid @RequestBody User user, @PathVariable int id) {
         log.info("update {} with id={}", user, id);
         user.setId(id);
@@ -69,6 +99,7 @@ public class AdminUserController {
     @Operation(summary = "Delete user")
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @CacheEvict(value = {"users", "auth"}, allEntries = true)
     public void delete(@PathVariable int id) {
         log.info("delete {}", id);
         repository.deleteExisted(id);
