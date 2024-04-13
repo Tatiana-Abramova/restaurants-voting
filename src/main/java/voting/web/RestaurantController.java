@@ -50,7 +50,6 @@ public class RestaurantController {
 
     @Operation(summary = "Get all restaurants")
     @GetMapping
-    @Cacheable("restaurants")
     public List<RestaurantTo> getAll() {
         log.info("getAll");
         return restaurantRepository.getAllWithVoteCount();

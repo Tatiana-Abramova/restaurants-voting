@@ -1,5 +1,6 @@
 package voting.repository;
 
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -37,6 +38,7 @@ public interface DishRepository extends JpaRepository<Dish, Integer> {
     }
 
     @Query("SELECT d FROM Dish d WHERE d.restaurant.id = :restId AND d.dishDate = CURRENT_DATE ORDER BY d.name")
+    @Cacheable(value = "dishes")
     List<Dish> getAll(int restId);
 
     @Query("""

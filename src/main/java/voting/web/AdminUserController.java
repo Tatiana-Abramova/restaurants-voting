@@ -37,31 +37,11 @@ public class AdminUserController {
     @Autowired
     private UserRepository repository;
 
-    @Autowired
-    private CacheManager cacheManager;
-
     @Operation(summary = "Get all users")
     @GetMapping
     public List<User> getAll() {
         log.info("getAll");
         return repository.getAll();
-    }
-
-    @GetMapping(value = "/inspectCache")
-    public void inspectCache() {
-        CaffeineCache caffeineCache = (CaffeineCache) cacheManager.getCache("users");
-        Cache<Object, Object> nativeCache = caffeineCache.getNativeCache();
-        for (Map.Entry<Object, Object> entry : nativeCache.asMap().entrySet()) {
-            System.out.println("Key = " + entry.getKey());
-            System.out.println("Value = " + entry.getValue());
-        }
-        System.out.println("auth:");
-        caffeineCache = (CaffeineCache) cacheManager.getCache("auth");
-        nativeCache = caffeineCache.getNativeCache();
-        for (Map.Entry<Object, Object> entry : nativeCache.asMap().entrySet()) {
-            System.out.println("Key = " + entry.getKey());
-            System.out.println("Value = " + entry.getValue());
-        }
     }
 
     @Operation(summary = "Get user details by ID")

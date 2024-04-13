@@ -15,7 +15,9 @@ import java.time.LocalDate;
 import java.util.Date;
 
 @Entity
-@Table(name = "dish", uniqueConstraints = {@UniqueConstraint(columnNames = {"name", "rest_id", "dish_date"}, name = "dish_unique_name_restaurant_date_idx")})
+@Table(name = "dish",
+        uniqueConstraints = {@UniqueConstraint(columnNames = {"name", "rest_id", "dish_date"}, name = "dish_unique_name_restaurant_date_idx")},
+        indexes = @Index(name = "dish_dish_date_idx", columnList = "dishDate"))
 @Getter
 @ToString(callSuper = true, exclude = {"restaurant"})
 public class Dish extends NamedEntity {

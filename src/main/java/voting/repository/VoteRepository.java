@@ -15,7 +15,4 @@ public interface VoteRepository extends JpaRepository<Vote, Integer> {
 
     @Query("SELECT v FROM Vote v WHERE v.id.userId = :userId AND v.id.voteDate = CURRENT_DATE")
     Vote getByUserId(int userId);
-
-    @Query("SELECT v FROM Vote v WHERE v.id.restaurantId = :restaurantId AND v.id.voteDate = CURRENT_DATE")
-    List<Vote> getByRestaurantId(int restaurantId);
 }

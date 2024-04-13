@@ -23,7 +23,6 @@ import org.springframework.context.annotation.Configuration;
                 <p><b>Test credentials:</b><br>
                 - user@yandex.ru / password<br>
                 - admin@gmail.com / admin<br>
-                - guest@gmail.com / guest</p>
                 """),
         security = @SecurityRequirement(name = "basicAuth"))
 public class OpenApiConfig {

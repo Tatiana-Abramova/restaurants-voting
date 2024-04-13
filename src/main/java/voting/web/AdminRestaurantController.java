@@ -125,6 +125,7 @@ public class AdminRestaurantController {
     @Operation(summary = "Create a new dish")
     @PostMapping(value = "/{id}/menu", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
+    @CacheEvict(value = "dishes", key = "#id")
     public ResponseEntity<Dish> createDish(@RequestBody @Valid Dish dish, @PathVariable int id) {
         log.info("create {}", dish);
         dish.checkNew();
@@ -135,6 +136,7 @@ public class AdminRestaurantController {
 
     @Operation(summary = "Update dish by ID")
     @PutMapping(value = "/{id}/menu/{dish_id}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @CacheEvict(value = "dishes", key = "#id")
     public ResponseEntity<Dish> updateDish(@Valid @RequestBody Dish dish, @PathVariable int id, @PathVariable("dish_id") int dishId) {
         log.info("update {} with id={}", dish, dish);
         RestaurantTo restaurant = restaurantRepository.getWithVoteCountExisted(id);
@@ -154,6 +156,7 @@ public class AdminRestaurantController {
     @Operation(summary = "Delete dish by ID")
     @DeleteMapping("/{id}/menu/{dish_id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @CacheEvict(value = "dishes", key = "#id")
     public void deleteDish(@PathVariable int id, @PathVariable("dish_id") int dishId) {
         log.info("delete dish with id = {}", dishId);
         RestaurantTo restaurant = restaurantRepository.getWithVoteCountExisted(id);

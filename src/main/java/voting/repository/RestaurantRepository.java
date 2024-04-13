@@ -20,11 +20,6 @@ public interface RestaurantRepository extends BaseRepository<Restaurant> {
         return applyExisted(this::get, id, Restaurant.class);
     }
 
-/*    @Transactional
-    @Modifying
-    @Query("UPDATE Restaurant r SET r.deleted=true WHERE r.id=:id")
-    int delete(int id);*/
-
     @Query("""
             SELECT new voting.to.RestaurantTo(r.id, r.name, r.registered, count(v.id.restaurantId))
             FROM Restaurant r
@@ -54,6 +49,5 @@ public interface RestaurantRepository extends BaseRepository<Restaurant> {
             GROUP BY r.id, r.name, v.id.restaurantId
             ORDER BY r.name
             """)
-    @Cacheable("restaurants")
     List<RestaurantTo> getAllWithVoteCount();
 }
