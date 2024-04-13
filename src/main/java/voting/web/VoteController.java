@@ -26,7 +26,7 @@ import java.util.List;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
-@Tag(name = "3. Vote Controller")
+@Tag(name = "3. Restaurants voting")
 @RestController
 @RequestMapping(value = VoteController.REST_URL, produces = MediaType.APPLICATION_JSON_VALUE)
 public class VoteController {
