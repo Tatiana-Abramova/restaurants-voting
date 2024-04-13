@@ -29,7 +29,7 @@ voting:
     minutes: 0
 logging:
   level:
-    root: DEBUG # logging level for all packages
+    root: WARN # logging level for all packages
     voting: DEBUG
     org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver: DEBUG
 

@@ -4,7 +4,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -27,10 +26,10 @@ import java.util.List;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
-@Tag(name = "3. Restaurant Controller")
+@Tag(name = "3. Vote Controller")
 @RestController
-@RequestMapping(value = RestaurantController.REST_URL, produces = MediaType.APPLICATION_JSON_VALUE)
-public class RestaurantController {
+@RequestMapping(value = VoteController.REST_URL, produces = MediaType.APPLICATION_JSON_VALUE)
+public class VoteController {
 
     private final Logger log = getLogger(getClass());
 
@@ -55,6 +54,13 @@ public class RestaurantController {
         return restaurantRepository.getAllWithVoteCount();
     }
 
+    @Operation(summary = "Get restaurant menu")
+    @GetMapping("/{id}/menu")
+    public List<Dish> getMenu(@PathVariable int id) {
+        log.info("get menu for restaurantId = " + id);
+        return dishRepository.getAll(id);
+    }
+
     @Operation(summary = "Vote for a restaurant")
     @PutMapping(value = "/{id}/vote")
     @ResponseStatus(HttpStatus.NO_CONTENT)
@@ -77,12 +83,5 @@ public class RestaurantController {
         vote.setRestaurant(new Restaurant(id));
         vote.setUser(authUser.getUser());
         voteRepository.save(vote);
-    }
-
-    @Operation(summary = "Get restaurant menu")
-    @GetMapping("/{id}/menu")
-    public List<Dish> getMenu(@PathVariable int id) {
-        log.info("get menu for restaurantId = " + id);
-        return dishRepository.getAll(id);
     }
 }
