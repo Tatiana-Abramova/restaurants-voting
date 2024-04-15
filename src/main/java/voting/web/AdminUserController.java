@@ -1,17 +1,12 @@
 package voting.web;
 
 
-import com.github.benmanes.caffeine.cache.Cache;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.annotation.Caching;
-import org.springframework.cache.caffeine.CaffeineCache;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -22,7 +17,6 @@ import voting.util.RestUtil;
 import voting.util.UserUtil;
 
 import java.util.List;
-import java.util.Map;
 
 import static org.slf4j.LoggerFactory.getLogger;
 

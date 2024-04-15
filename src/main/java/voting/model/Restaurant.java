@@ -10,7 +10,6 @@ import lombok.Setter;
 import lombok.ToString;
 
 import java.time.LocalDate;
-import java.util.Date;
 import java.util.List;
 
 @Entity
@@ -25,7 +24,7 @@ public class Restaurant extends NamedEntity {
     @Column(name = "registered", nullable = false, columnDefinition = "date default CURRENT_DATE", updatable = false)
     @NotNull
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-    private LocalDate registered = LocalDate.now();
+    private LocalDate registered = LocalDate.now(); //TODO add time java.sql.date
 
     @Column(name = "deleted", nullable = false, columnDefinition = "bool default false")
     @JsonIgnore

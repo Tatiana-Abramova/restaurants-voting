@@ -23,7 +23,6 @@ import voting.util.RestUtil;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
