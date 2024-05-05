@@ -59,6 +59,7 @@ public class AdminUserController {
 
     @Operation(summary = "Update user by ID")
     @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     @CacheEvict(value = {"users", "auth"}, allEntries = true)
     @Transactional
     public void update(@Valid @RequestBody User user, @PathVariable int id) {

@@ -57,6 +57,7 @@ public class AdminDishController {
 
     @Operation(summary = "Update dish by ID")
     @PutMapping(value = "/{dish_id}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     @CacheEvict(value = "dishes", key = "#id")
     @Transactional
     public void update(@Valid @RequestBody Dish dish, @PathVariable int id, @PathVariable("dish_id") int dishId) {
