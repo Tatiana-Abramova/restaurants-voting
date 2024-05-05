@@ -14,7 +14,6 @@ import voting.model.User;
 import voting.repository.UserRepository;
 import voting.security.AuthUser;
 import voting.to.UserTo;
-import voting.to.UserVoteTo;
 import voting.to.mapper.UserMapper;
 import voting.util.RestUtil;
 import voting.util.UserUtil;
@@ -30,13 +29,13 @@ public class ProfileController {
     protected static final String REST_URL = "/api/profile";
 
     @Autowired
-    private UserRepository repository;
+    private UserRepository userRepository;
 
     @Operation(summary = "Get authorized user details")
     @GetMapping
-    public UserVoteTo get(@AuthenticationPrincipal AuthUser authUser) {
+    public User get(@AuthenticationPrincipal AuthUser authUser) {
         log.info("get user with id = {}", authUser.id());
-        return repository.getWithVoteExisted(authUser.id());
+        return userRepository.getExisted(authUser.id());
     }
 
     @Operation(summary = "Register a new user. Authorization is not required")
@@ -46,7 +45,7 @@ public class ProfileController {
         log.info("register {}", userTo);
         userTo.checkNew();
         User created =
-                repository.save(UserUtil.prepareToSave(UserMapper.createFromUserTo(userTo)));
+                userRepository.save(UserUtil.prepareToSave(UserMapper.createFromUserTo(userTo)));
         return RestUtil.buildResponse(created, REST_URL);
     }
 
@@ -54,9 +53,9 @@ public class ProfileController {
     @PutMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void update(@RequestBody @Valid UserTo userTo, @AuthenticationPrincipal AuthUser authUser) {
-        log.info("update {} with id={}", userTo, authUser.id());
+        log.info("update {} with id = {}", userTo, authUser.id());
         User user = authUser.getUser();
         UserUtil.prepareToSave(UserMapper.updateFromUserTo(user, userTo));
-        repository.save(user);
+        userRepository.save(user);
     }
 }

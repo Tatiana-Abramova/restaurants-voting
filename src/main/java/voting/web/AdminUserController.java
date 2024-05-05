@@ -10,6 +10,7 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import voting.model.User;
 import voting.repository.UserRepository;
@@ -20,7 +21,7 @@ import java.util.List;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
-@Tag(name = "2. User Administration")
+@Tag(name = "3. User Administration")
 @RestController
 @RequestMapping(value = AdminUserController.REST_URL, produces = MediaType.APPLICATION_JSON_VALUE)
 public class AdminUserController {
@@ -52,22 +53,19 @@ public class AdminUserController {
     public ResponseEntity<User> create(@RequestBody @Valid User user) {
         log.info("create {}", user);
         user.checkNew();
-        User created = repository.save(UserUtil.prepareToSave(user));
-        return RestUtil.buildResponse(created, REST_URL);
+        User created = repository.saveAndFlush(UserUtil.prepareToSave(user));
+        return RestUtil.buildResponse(created, String.format("%s/%s", REST_URL, created.getId()));
     }
 
     @Operation(summary = "Update user by ID")
     @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
     @CacheEvict(value = {"users", "auth"}, allEntries = true)
-    public ResponseEntity<User> update(@Valid @RequestBody User user, @PathVariable int id) {
-        log.info("update {} with id={}", user, id);
+    @Transactional
+    public void update(@Valid @RequestBody User user, @PathVariable int id) {
+        log.info("update {} with id = {}", user, id);
+        repository.checkExisted(id);
         user.setId(id);
-        User stored = repository.saveAndFlush(UserUtil.prepareToSave(user));
-        if (stored.getId() == id) {
-            return RestUtil.emptyResponse();
-        } else {
-            return RestUtil.buildResponse(stored, REST_URL);
-        }
+        repository.save(UserUtil.prepareToSave(user));
     }
 
     @Operation(summary = "Delete user")
@@ -75,7 +73,7 @@ public class AdminUserController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @CacheEvict(value = {"users", "auth"}, allEntries = true)
     public void delete(@PathVariable int id) {
-        log.info("delete {}", id);
+        log.info("delete user with id = {}", id);
         repository.deleteExisted(id);
     }
 }

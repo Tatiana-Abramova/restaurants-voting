@@ -36,7 +36,8 @@ public class RestExceptionHandler {
     private static final Map<String, String> CONSTRAINTS = Map.of(
             "users_unique_email_idx", "User with this email already exists",
             "restaurant_unique_name_idx", "Restaurant with this name already exists",
-            "dish_unique_name_restaurant_date_idx", "Dish with this name and restaurant already exists for today");
+            "dish_unique_restaurant_date_name_idx", "Dish with this name and restaurant already exists for this date",
+            "vote_unique_vote_date_user_restaurant_idx", "Vote for this user and restaurant already exists for today");
 
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @ExceptionHandler(NotFoundException.class)

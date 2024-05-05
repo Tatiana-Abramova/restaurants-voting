@@ -17,12 +17,9 @@ import voting.model.Role;
 import voting.model.User;
 import voting.repository.UserRepository;
 import voting.to.UserTo;
-import voting.to.UserVoteTo;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.util.Date;
 
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -31,6 +28,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Transactional
 @AutoConfigureMockMvc
 class ProfileControllerTest {
+
+    private final static String REST_URL = "/api/profile";
 
     @Autowired
     private MockMvc mockMvc;
@@ -46,15 +45,18 @@ class ProfileControllerTest {
     @Test
     @WithUserDetails(value = "admin@gmail.com")
     void get() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/profile"))
+        User expected = new User(2, "Admin", "admin@gmail.com", null, Role.USER, Role.ADMIN);
+        ResultActions action = mockMvc.perform(MockMvcRequestBuilders.get(REST_URL))
                 .andExpect(status().isOk())
-                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-                .andExpect(content().json(mapper.writeValueAsString(new UserVoteTo(2, "Admin", "admin@gmail.com", Date.from(Instant.now()), null))));
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON));
+        User actual = mapper.readValue(action.andReturn().getResponse().getContentAsString(), User.class);
+        Assertions.assertThat(actual).usingRecursiveComparison().ignoringFields("registered").isEqualTo(expected);
+        Assertions.assertThat(actual.getRegistered()).isEqualToIgnoringSeconds(expected.getRegistered());
     }
 
     @Test
     void getUnAuth() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/profile"))
+        mockMvc.perform(MockMvcRequestBuilders.get(REST_URL))
                 .andExpect(status().isUnauthorized());
     }
 
@@ -62,7 +64,7 @@ class ProfileControllerTest {
     void register() throws Exception {
         UserTo userTo = new UserTo(null, "Test", "test@mail.test", "pass");
         User expected = new User(null, "Test", "test@mail.test", null, Role.USER);
-        ResultActions action = mockMvc.perform(MockMvcRequestBuilders.post("/api/profile")
+        ResultActions action = mockMvc.perform(MockMvcRequestBuilders.post(REST_URL)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(userTo)))
                 .andExpect(status().isCreated());
@@ -78,7 +80,7 @@ class ProfileControllerTest {
     void update() throws Exception {
         UserTo userTo = new UserTo(null, "Test", "admin@gmail.com", "pass");
         User expected = new User(2, "Test", "admin@gmail.com", "pass", Role.ADMIN, Role.USER);
-        mockMvc.perform(MockMvcRequestBuilders.put("/api/profile")
+        mockMvc.perform(MockMvcRequestBuilders.put(REST_URL)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(userTo)))
                 .andExpect(status().isNoContent());

@@ -32,14 +32,6 @@ public class AuthUser extends org.springframework.security.core.userdetails.User
         return requireNonNull(safeGet(), "No authorized user found");
     }
 
-/*    public static User authUser() {
-        return get().getUser();
-    }
-
-    public static int authId() {
-        return get().id();
-    }*/
-
     public int id() {
         Assert.notNull(user.getId(), "Entity must has id");
         return user.getId();

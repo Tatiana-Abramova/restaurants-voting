@@ -15,8 +15,8 @@ VALUES  ('Kalimera'),
         ('Nero'),
         ('Zahar');
 
-INSERT INTO DISH (NAME, PRICE, REST_ID)
-VALUES  ('Meat', 200.00, 1),
-        ('Vegetables', 100.00, 1),
-        ('Chicken', 200.00, 2),
-        ('Raviolli', 300.00, 2);
+INSERT INTO DISH (NAME, PRICE, DISH_DATE, REST_ID)
+VALUES  ('Meat', 200.00, '2024-01-01', 1),
+        ('Vegetables', 100.00, '2024-01-02', 1),
+        ('Chicken', 200.00, '2024-02-01', 2),
+        ('Raviolli', 300.00, '2024-02-02', 2);

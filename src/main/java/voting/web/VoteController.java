@@ -1,87 +1,94 @@
 package voting.web;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.lang.Nullable;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import voting.config.AppProperties;
 import voting.error.InvalidTimeException;
-import voting.model.Dish;
-import voting.model.Restaurant;
 import voting.model.Vote;
-import voting.model.VoteId;
-import voting.repository.DishRepository;
-import voting.repository.RestaurantRepository;
 import voting.repository.VoteRepository;
 import voting.security.AuthUser;
-import voting.to.RestaurantTo;
+import voting.to.VoteRestaurantTo;
+import voting.to.VoteTo;
+import voting.to.mapper.VoteMapper;
+import voting.util.RestUtil;
 
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
-@Tag(name = "3. Restaurants voting")
+@Tag(name = "2. User Voting")
 @RestController
 @RequestMapping(value = VoteController.REST_URL, produces = MediaType.APPLICATION_JSON_VALUE)
 public class VoteController {
 
     private final Logger log = getLogger(getClass());
 
-    protected static final String REST_URL = "/api/profile/restaurants";
-
-    @Autowired
-    private RestaurantRepository restaurantRepository;
+    protected static final String REST_URL = "/api/profile/votes";
 
     @Autowired
     private VoteRepository voteRepository;
 
     @Autowired
-    private DishRepository dishRepository;
-
-    @Autowired
     private AppProperties properties;
 
-    @Operation(summary = "Get all restaurants")
+    @Operation(summary = "Get user votes")
     @GetMapping
-    public List<RestaurantTo> getAll() {
-        log.info("getAll");
-        return restaurantRepository.getAllWithVoteCount();
+    public List<VoteRestaurantTo> getVotes(@AuthenticationPrincipal AuthUser authUser,
+                                           @RequestParam @Nullable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @Parameter(description = "Start date inclusive", example = "2022-07-15") LocalDate startDate,
+                                           @RequestParam @Nullable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @Parameter(description = "End date exclusive", example = "2024-07-16") LocalDate endDate) {
+        log.info("get votes for userId = {}", authUser.id());
+        return voteRepository.getAllByUserId(authUser.id(), startDate, endDate);
     }
 
-    @Operation(summary = "Get restaurant menu")
-    @GetMapping("/{id}/menu")
-    public List<Dish> getMenu(@PathVariable int id) {
-        log.info("get menu for restaurantId = " + id);
-        return dishRepository.getAll(id);
+    @Operation(summary = "Vote for a restaurant for today")
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseStatus(HttpStatus.CREATED)
+    @Transactional
+    public ResponseEntity<Vote> vote(@RequestBody @Valid VoteTo voteTo, @AuthenticationPrincipal AuthUser authUser) {
+        log.info("userId = {} votes for restaurantId = {}", authUser.id(), voteTo.restaurantId());
+        voteTo.checkNew();
+        Vote vote = voteRepository.getCurrentByUserId(authUser.id());
+        if (vote != null && LocalTime.now().isAfter(LocalTime.of(properties.getDeadlineHours(), properties.getDeadlineMinutes()))) {
+            throw new InvalidTimeException();
+        }
+        Vote created = voteRepository.save(VoteMapper.createFromVoteTo(voteTo, authUser));
+        return RestUtil.buildResponse(created, REST_URL + "/votes");
     }
 
-    @Operation(summary = "Vote for a restaurant")
-    @PutMapping(value = "/{id}/vote")
+    @Operation(summary = "Re-vote for a restaurant for today")
+    @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Transactional
-    public void vote(@PathVariable int id, @AuthenticationPrincipal AuthUser authUser) {
-        log.info("userId = {} votes for restaurantId = {}", authUser.id(), id);
-        Vote vote = voteRepository.getByUserId(authUser.id());
-
-        if (vote != null) {
-            if (!vote.getId().getRestaurantId().equals(id)) {
+    public void reVote(@RequestBody @Valid VoteTo voteTo, @PathVariable int id, @AuthenticationPrincipal AuthUser authUser) {
+        log.info("userId = {} votes for restaurantId = {}", authUser.id(), voteTo.restaurantId());
+        Optional<Vote> optionalVote = voteRepository.findById(id);
+        Vote vote;
+        if (optionalVote.isPresent()) {
+            vote = optionalVote.get();
+            if (!vote.getRestaurant().getId().equals(voteTo.restaurantId())) {
                 if (LocalTime.now().isAfter(LocalTime.of(properties.getDeadlineHours(), properties.getDeadlineMinutes()))) {
                     throw new InvalidTimeException();
                 }
-                voteRepository.delete(vote);
-            } else {
-                return;
             }
+            VoteMapper.updateFromVoteTo(vote, voteTo);
+        } else {
+            vote = VoteMapper.createFromVoteTo(voteTo, authUser);
         }
-        vote = new Vote(new VoteId(id, authUser.id()));
-        vote.setRestaurant(new Restaurant(id));
-        vote.setUser(authUser.getUser());
         voteRepository.save(vote);
     }
 }

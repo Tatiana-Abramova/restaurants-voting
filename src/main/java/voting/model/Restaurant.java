@@ -24,7 +24,7 @@ public class Restaurant extends NamedEntity {
     @Column(name = "registered", nullable = false, columnDefinition = "date default CURRENT_DATE", updatable = false)
     @NotNull
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-    private LocalDate registered = LocalDate.now(); //TODO add time java.sql.date
+    private LocalDate registered = LocalDate.now();
 
     @Column(name = "deleted", nullable = false, columnDefinition = "bool default false")
     @JsonIgnore
@@ -32,7 +32,13 @@ public class Restaurant extends NamedEntity {
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "restaurant")
     @JsonIgnore
+    @ToString.Exclude
     private List<Vote> votes;
+
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "restaurant")
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    @ToString.Exclude
+    private List<Dish> dishes;
 
     public Restaurant(Integer id) {
         this.id = id;

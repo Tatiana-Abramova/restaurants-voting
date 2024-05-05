@@ -9,15 +9,14 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
-import voting.error.DataConflictException;
 import voting.model.Restaurant;
 import voting.repository.RestaurantRepository;
 import voting.to.RestaurantTo;
 import voting.util.RestUtil;
 
 import java.util.List;
-import java.util.Optional;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -33,10 +32,10 @@ public class AdminRestaurantController {
     @Autowired
     private RestaurantRepository restaurantRepository;
 
-    @Operation(summary = "Get all restaurants")
+    @Operation(summary = "Get all restaurants with votes count")
     @GetMapping
     public List<RestaurantTo> getAll() {
-        log.info("getAll");
+        log.info("get all restaurants");
         return restaurantRepository.getAllWithVoteCount();
     }
 
@@ -55,25 +54,18 @@ public class AdminRestaurantController {
         log.info("create {}", restaurant);
         restaurant.checkNew();
         Restaurant created = restaurantRepository.save(restaurant);
-        return RestUtil.buildResponse(created, REST_URL);
+        return RestUtil.buildResponse(created, String.format("%s/%s", REST_URL, created.getId()));
     }
 
     @Operation(summary = "Update restaurant by ID")
     @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
     @CacheEvict(value = "restaurants", allEntries = true)
-    public ResponseEntity<Restaurant> update(@Valid @RequestBody Restaurant restaurant, @PathVariable int id) {
-        log.info("update {} with id={}", restaurant, id);
-        Optional<RestaurantTo> existed = restaurantRepository.getWithVoteCount(id);
-        if (existed.isPresent() && existed.get().votesCount() > 0) {
-            throw new DataConflictException("Restaurant with votes for today cannot be changed");
-        }
+    @Transactional
+    public void update(@Valid @RequestBody Restaurant restaurant, @PathVariable int id) {
+        log.info("update {} with id = {}", restaurant, id);
+        restaurantRepository.checkExisted(id);
         restaurant.setId(id);
-        Restaurant stored = restaurantRepository.saveAndFlush(restaurant);
-        if (stored.getId() == id) {
-            return RestUtil.emptyResponse();
-        } else {
-            return RestUtil.buildResponse(stored, REST_URL);
-        }
+        restaurantRepository.save(restaurant);
     }
 
     @Operation(summary = "Delete restaurant")
@@ -82,10 +74,6 @@ public class AdminRestaurantController {
     @CacheEvict(value = "restaurants", allEntries = true)
     public void delete(@PathVariable int id) {
         log.info("delete restaurant with id = {}", id);
-        RestaurantTo restaurant = restaurantRepository.getWithVoteCountExisted(id);
-        if (restaurant.votesCount() > 0) {
-            throw new DataConflictException("Restaurant with votes for today cannot be deleted");
-        }
-        restaurantRepository.delete(id);
+        restaurantRepository.deleteExisted(id);
     }
 }

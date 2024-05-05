@@ -26,7 +26,7 @@ public abstract class BaseEntity implements HasId {
         return id;
     }
 
-    @Override //TODO Add description
+    @Override
     public boolean equals(Object o) {
         if (this == o) {
             return true;

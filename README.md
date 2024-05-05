@@ -1,6 +1,7 @@
 # Restaurants voting system
 
 ## Description
+A voting system for deciding where to have lunch.
 * 2 types of users: admin and regular users
 * Admin can input a restaurant, and it's lunch menu of the day (2-5 items usually, just a dish name and price)
 * Menu changes each day (admins do the updates)
@@ -23,6 +24,9 @@
 * REST(Jackson)
 * H2 DB
 * JUnit
+
+## Run the project
+mvn spring-boot:run
 
 ## API Documentation
 http://localhost:8080/swagger-ui/index.html#/

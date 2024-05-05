@@ -5,10 +5,11 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.NoRepositoryBean;
 import org.springframework.transaction.annotation.Transactional;
-import voting.error.NotFoundException;
 
 import java.util.Optional;
-import java.util.function.Function;
+
+import static voting.util.ValidationUtil.checkDeleted;
+import static voting.util.ValidationUtil.checkNotFound;
 
 @NoRepositoryBean
 public interface BaseRepository<T> extends JpaRepository<T, Integer> {
@@ -19,11 +20,17 @@ public interface BaseRepository<T> extends JpaRepository<T, Integer> {
     @Transactional
     @Modifying
     @Query("UPDATE #{#entityName} e SET e.deleted=true WHERE e.id=:id AND e.deleted = false")
-    int delete(int id);
+    Integer delete(Integer id);
 
-    default <R> R applyExisted(Function<Integer, Optional<R>> func, int id, Class<T> clazz) {
-        return func.apply(id).orElseThrow(() -> new NotFoundException(id, clazz));
+    default T getExisted(int id) {
+        return checkNotFound(get(id), id);
     }
 
-    T getExisted(int id);
+    default void checkExisted(int id) {
+        getExisted(id);
+    }
+
+    default void deleteExisted(int id) {
+        checkDeleted(delete(id), id);
+    }
 }

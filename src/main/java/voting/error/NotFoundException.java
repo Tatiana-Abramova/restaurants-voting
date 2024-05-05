@@ -5,8 +5,7 @@ public class NotFoundException extends ApiException {
         super(msg);
     }
 
-    public <T> NotFoundException(int id, Class<T> clazz) {
-        super(clazz.getSimpleName() + " with id = " + id + " not found");
-
+    public NotFoundException(int id, String msg) {
+        super("Entity with id = " + id + " not found" + (msg == null ? "" : msg));
     }
 }

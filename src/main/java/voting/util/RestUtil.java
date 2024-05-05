@@ -9,11 +9,7 @@ public class RestUtil {
 
     public static <T> ResponseEntity<T> buildResponse(T entity, String url) {
         URI uriOfNewResource = ServletUriComponentsBuilder.fromCurrentContextPath()
-                .path(url + "/{id}").build().toUri();
+                .path(url).build().toUri();
         return ResponseEntity.created(uriOfNewResource).body(entity);
-    }
-
-    public static <T> ResponseEntity<T> emptyResponse() {
-        return ResponseEntity.noContent().build();
     }
 }
